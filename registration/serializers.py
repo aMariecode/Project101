@@ -1,12 +1,13 @@
 from rest_framework import serializers
-from .models import Registration  # Ensure the model name matches your actual model
+from .models import Registration
+from django.contrib.auth.hashers import make_password
 
-class RegistrationSerializer(serializers.ModelSerializer):  # Fixed the class name
+class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Registration  # Ensure this matches models.py
+        model = Registration
         fields = '__all__'
 
-    def validate(self, data):  # Correct placement of validation function
-        if data.get('password') != data.get('confirm_password'):  # Fixed typo in field name
-            raise serializers.ValidationError("Passwords do not match.")
-        return data
+    def create(self, validated_data):
+        # Hash the password before saving
+        validated_data['password'] = make_password(validated_data['password'])
+        return super().create(validated_data)
